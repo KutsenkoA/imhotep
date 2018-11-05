@@ -9,20 +9,34 @@ import SwaggerUI from 'swagger-ui';
 })
 export class DashboardComponent implements OnInit {
 
+  public lookingForContracts = true;
+
+  public apis = [];
+
   constructor(
     private github: GithubService
   ) { }
 
   ngOnInit() {
-    this.github.find(new RegExp('^.*\.json$'))
-      .subscribe(results => console.log(results));
+    this.github.find(new RegExp('^.*\.yaml$'))
+      .subscribe(results => {
+        this.apis = results;
+        console.log(results);
+        this.lookingForContracts = false;
+
+        if (this.apis.length) {
+          SwaggerUI({
+            dom_id: '#swagger-ui',
+            url: this.apis[0].download_url
+          });
+        }
+      });
 
     window['Buffer'] = class Buffer {};
+  }
 
-    SwaggerUI({
-      dom_id: '#swagger-ui',
-      url: 'https://raw.githubusercontent.com/jexia-com/yggi-modules/develop/mimir/contracts/management.yaml?token=AE76_JMGwJJ1OUL6S-stzc8IvhiYXWPMks5b6UJEwA%3D%3D',
-    });
+  public changeApi(e) {
+    console.log(e);
   }
 
 }

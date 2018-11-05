@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: Utgard Management API
+  description: Provides API Key functionality
+  version: 0.1.0
+tags:
+- name: "API Key"
+  description: "Manage API Keys"
+paths:
+  /:
+    get:
+      tags:
+      - "API Key"
+      summary: Get list of API Keys
+      description: Get list of API Keys
+      responses:
+        '200':
+          description: List of API Keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/APIKey"
+    post:
+      tags:
+      - "API Key"
+      summary: Create an API Key
+      description: Generate an API Key with the given description
+      requestBody:
+        description: A JSON object containing a description for the API Key to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  example: "my api key"
+      responses:
+        '200':    # status code
+          description: Created API Key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIKeySecret"
+        '400':
+          description: Bad request
+        '500':
+          description: There is an internal error.
+
+  /{key}:
+    delete:
+      tags:
+      - "API Key"
+      summary: Delete an API Key
+      description: Delete an API Key by UUID
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+          description: API Key UUID (property "key" in returned object)
+      responses:
+        '200':    # status code
+          description: API Key has been deleted
+        '400':
+          description: Unable to parse UUID (invalid format)
+        '404':
+          description: API Key with provided UUID not found
+        '500':
+          description: There is an internal error.
+
+components:
+  schemas:
+    APIKeySecret:
+      description: Returned only once after being created and contains secret
+      type: object
+      properties:
+        description:
+          type: string
+          example: "my api key"
+        key:
+          type: string
+          example: "11edd598-1631-4242-b688-260d14c6116c"
+        secret:
+          type: string
+          example: "yGlhEMBsbbCYmsnQhE0O06rZcbPoBieZ1YYJjZ8"
+    APIKey:
+      type: object
+      properties:
+        description:
+          type: string
+          example: "my api key"
+        key:
+          type: string
+          example: "11edd598-1631-4242-b688-260d14c6116c"

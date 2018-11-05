@@ -20,6 +20,7 @@ interface GHRepoContent {
   name: string;
   path: string;
   url: string;
+  git_url: string;
 }
 
 
@@ -35,7 +36,7 @@ export class GithubService {
     private authService: AuthService
   ) { }
 
-  private request<T = any>(url: string, method: string = 'GET'): Observable<T> {
+  public request<T = any>(url: string, method: string = 'GET'): Observable<T> {
     return this.http.request<T>(method, url.startsWith('http') ? url : this.endpoint + url, {
       headers: new HttpHeaders({
         Authorization: 'token ' + this.authService.token,
@@ -78,7 +79,7 @@ export class GithubService {
 
   public find(pattern: RegExp = /^.*$/g) {
     return this.getRepos().pipe(
-      switchMap(repos => from(repos)),
+      switchMap(repos => from(repos.filter(repo => repo.name === 'imhotep'))),
       filter(repo => repo.size),
       concatMap(repo => this.getRepoContent(repo)),
       concatMap((content: GHRepoContent[]) => this.findInContent(content, pattern)),

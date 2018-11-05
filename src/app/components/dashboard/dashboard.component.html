@@ -1,1 +1,4 @@
+<select (select)="changeApi($event)">
+  <option *ngFor="let api of apis">{{api.name}}</option>
+</select>
 <div id="swagger-ui"></div>
