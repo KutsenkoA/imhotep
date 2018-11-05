@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { SwaggerUI } from 'swagger-ui';
 
 @Component({
   selector: 'imho-root',
@@ -9,13 +8,6 @@ import { SwaggerUI } from 'swagger-ui';
 export class AppComponent implements OnInit {
 
   ngOnInit() {
-    SwaggerUI({
-      dom_id: '#swagger-ui',
-      urls: [{
-        url: 'url',
-        name: 'API'
-      }]
-    });
   }
 
 }

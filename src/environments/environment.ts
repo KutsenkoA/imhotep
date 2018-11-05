@@ -3,7 +3,20 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  auth: {
+    github: {
+      url: 'https://github.com/login/oauth/authorize',
+      exchange_url: 'https://github.com/login/oauth/access_token',
+      client_id: '7c474e27de89589114f9',
+      client_secret: 'ffb5981db5420d255cb7ef90847bf454efffff4f',
+      scope: 'repo',
+      redirect: {
+        code_url: 'http://localhost.com:4210/token',
+        token_url: ''
+      }
+    }
+  }
 };
 
 /*

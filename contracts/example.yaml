@@ -1,0 +1,190 @@
+openapi: 3.0.0
+info:
+  title: Mimir Management API
+  description: Manage datasets and fields in Mimir.
+  version: 0.1.0
+tags:
+- name: "dataset"
+  description: "Manage datasets"
+- name: "field"
+  description: "Manage dataset fields"
+paths:
+  /ds/:
+    get:
+      tags:
+      - "dataset"
+      summary: List Datasets
+      description: List all datasets
+      responses:
+        '200':    # status code
+          description: Returns all datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+        '500':
+          description: There is an internal error
+    post:
+      tags:
+      - "dataset"
+      summary: Create Dataset
+      description: Create a new dataset
+      requestBody:
+        description: A JSON object containing required parameters. <br> <b>name</b> - Name of the dataset <br>
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "good_dataset"
+
+      responses:
+        '200':    # status code
+          description: Returns newly created dataset with all of its default fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+        '400':
+          description: Error parsing request body. Dataset name is invalid.
+        '500':
+          description: There is an internal error.
+  /ds/{dataset_id}/field:
+    post:
+      tags:
+      - "field"
+      summary: Create Field
+      description: Creates a new field in given dataset.
+      parameters:
+      - in: path
+        name: dataset_id
+        schema:
+          type: string
+        required: true
+        description: ID of the dataset in which field will be created
+        example: "ba567a16-3c41-4d47-ba5c-db7b43ea3355"
+      requestBody:
+        description: A JSON object containing required parameters. <br> <b>name</b> - Name of the field <br> <b>type - </b> type of field <br> <b>validators</b> - list of validators <br> <b>supported validators:</b> required
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "good_field"
+                type:
+                  $ref: "#/components/schemas/JexiaTypes"
+                validators:
+                  type: object
+                  properties:
+                    required:
+                      type: boolean
+                      default: false
+      responses:
+        '200':    # status code
+          description: A JSON object of field created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Field"
+        '400':  #status code
+          description: bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                      info:
+                        type: string
+        '404':  #status code
+          description: dataset not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                      info:
+                        type: string
+                        default: "dataset not found"
+        '500':  #status code
+          description: unexpected error
+
+components:
+  schemas:
+    Dataset:
+      properties:
+        id:
+          type: string
+          example: "e7d337f6-b0c5-414b-b8d5-1436011719e1"
+        name:
+          type: string
+          example: "good_dataset"
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/Field"
+        properties:
+          type: object
+          properties:
+            structure_immutable:
+              type: boolean
+              default: false
+    Field:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "842351cc-8565-45b4-b3a4-680061bfa424"
+        name:
+          type: string
+          example: "good_field"
+        type:
+          $ref: "#/components/schemas/JexiaTypes"
+        timestamp:
+          type: string
+        structure_mutable:
+          type: boolean
+        validators:
+          type: object
+          properties:
+            required:
+              type: boolean
+              default: false
+        properties:
+          type: object
+          properties:
+            hidden:
+              type: boolean
+              default: false
+            structure_immutable:
+              type: boolean
+              default: false
+    JexiaTypes:
+      type: string
+      enum:
+      - boolean
+      - date
+      - datetime
+      - float
+      - integer
+      - json
+      - string
+      - uuid
+      example: "boolean"
