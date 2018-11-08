@@ -16,7 +16,12 @@ export const environment = {
         token_url: ''
       }
     }
-  }
+  },
+  repos: [
+    'yggi-modules',
+    'rakshak',
+    'imhotep'
+  ]
 };
 
 /*

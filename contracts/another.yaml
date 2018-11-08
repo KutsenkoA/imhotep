@@ -6,6 +6,12 @@ info:
 tags:
 - name: "API Key"
   description: "Manage API Keys"
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
 paths:
   /:
     get:

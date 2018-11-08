@@ -1,4 +1,9 @@
-<select (select)="changeApi($event)">
-  <option *ngFor="let api of apis">{{api.name}}</option>
-</select>
-<div id="swagger-ui"></div>
+<div *ngIf="lookingForContracts">
+  Searching contracts in your repositories... It can take some time depends how many repos do you have :)
+</div>
+<div>
+  <span *ngFor="let api of apis | async">
+    [<a routerLink="{{api.file.sha}}">{{api.repo.name | uppercase}} {{api.file.path}}</a>]
+  </span>
+</div>
+<router-outlet></router-outlet>

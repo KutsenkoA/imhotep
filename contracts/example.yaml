@@ -3,6 +3,12 @@ info:
   title: Mimir Management API
   description: Manage datasets and fields in Mimir.
   version: 0.1.0
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
 tags:
 - name: "dataset"
   description: "Manage datasets"

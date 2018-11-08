@@ -1,26 +1,35 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
-import { concatMap, filter, map, reduce, scan, switchMap, tap } from 'rxjs/operators';
+import { concatMap, filter, map, reduce, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
+import parse from 'github-parse-link';
+import { environment } from 'src/environments/environment';
 
-interface GHUser {
+export interface GHUser {
   login: string;
 }
 
-interface GHRepo {
+export interface GHRepo {
   id: number;
   name: string;
   owner: GHUser;
   size: number;
 }
 
-interface GHRepoContent {
+export interface GHRepoContent {
   type: 'file' | 'dir' | 'symlink' | 'submodule';
   name: string;
   path: string;
   url: string;
   git_url: string;
+  download_url: string;
+  sha: string;
+}
+
+export interface GHFile {
+  repo: GHRepo;
+  file: GHRepoContent;
 }
 
 
@@ -31,13 +40,28 @@ export class GithubService {
 
   private readonly endpoint = 'https://api.github.com';
 
+  public lastSearch: GHFile[] = [];
+
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) { }
 
-  public request<T = any>(url: string, method: string = 'GET'): Observable<T> {
-    return this.http.request<T>(method, url.startsWith('http') ? url : this.endpoint + url, {
+  /* Request with pagination resolved */
+  public requestPagination<T>(url: string): Observable<T[]> {
+    return this.request<T[]>(url, 'GET', { observe: 'response' }).pipe(
+      concatMap((response: HttpResponse<T[]>) => {
+        const links = parse(response.headers.get('Link'));
+        return links.next ? this.requestPagination<T>(links.next).pipe(
+          map((results: T[]) => [...results, ...response.body])
+        ) : of(response.body);
+      }),
+    );
+  }
+
+  public request<T = any>(url: string, method: string = 'GET', options = {}): Observable<T | HttpResponse<T>> {
+    return this.http.request<T>(method, url.startsWith('https://') ? url : this.endpoint + url, {
+      ...options,
       headers: new HttpHeaders({
         Authorization: 'token ' + this.authService.token,
         Accept: 'application/vnd.github.v3+json'
@@ -46,25 +70,24 @@ export class GithubService {
   }
 
   public getRepos(): Observable<GHRepo[]> {
-    return this.request<GHRepo[]>('/user/repos');
+    return this.requestPagination<GHRepo>('/user/repos');
   }
 
   public getRepoContent(repo: GHRepo): Observable<GHRepoContent[]> {
-    return this.request<GHRepoContent[]>(`/repos/${repo.owner.login}/${repo.name}/contents`);
+    return this.requestPagination<GHRepoContent>(`/repos/${repo.owner.login}/${repo.name}/contents`);
   }
 
-  public findInContent(content: GHRepoContent[], pattern: RegExp) {
+  public findInContent(repo: GHRepo, content: GHRepoContent[], pattern: RegExp): Observable<GHFile[]> {
 
-    const files: GHRepoContent[] = [];
+    const files: GHFile[] = [];
 
-    const dirs = content.filter((entry: GHRepoContent) => {
-      if (entry.type === 'file' && pattern.test(entry.name)) {
-        files.push(entry);
+    const dirs = content.filter((file: GHRepoContent) => {
+      if (file.type === 'file' && pattern.test(file.name)) {
+        files.push({ repo, file });
         return false;
-      } else if (entry.type === 'dir') {
-        return true;
+      } else {
+        return file.type === 'dir';
       }
-      return false;
     });
 
     if (!dirs.length) {
@@ -72,20 +95,32 @@ export class GithubService {
     }
 
     return from(dirs).pipe(
-      concatMap(dir => this.request(dir.url)),
-      concatMap((deepContent: GHRepoContent[]) => this.findInContent(deepContent, pattern)),
+      concatMap(dir => this.requestPagination<GHRepoContent>(dir.url)),
+      concatMap((deepContent: GHRepoContent[]) => this.findInContent(repo, deepContent, pattern)),
     );
   }
 
-  public find(pattern: RegExp = /^.*$/g) {
+  public find(pattern: RegExp) {
     return this.getRepos().pipe(
-      switchMap(repos => from(repos.filter(repo => repo.name === 'imhotep'))),
-      filter(repo => repo.size),
-      concatMap(repo => this.getRepoContent(repo)),
-      concatMap((content: GHRepoContent[]) => this.findInContent(content, pattern)),
+      switchMap(repos => from(
+        repos.filter(repo => environment.repos.includes(repo.name))
+      )),
+      tap(repos => console.log(repos)),
+      filter(repo => !!repo.size),
+      concatMap((repo: GHRepo) => this.getRepoContent(repo).pipe(
+        concatMap((content: GHRepoContent[]) => this.findInContent(repo, content, pattern))
+      )),
       reduce((result, files) => {
         return [...result, ...files];
-      }, [])
+      }, []),
+      tap(result => {
+        this.lastSearch = result;
+        console.log(this.lastSearch);
+      })
     );
+  }
+
+  public getApiBySha(sha: string): GHFile {
+    return this.lastSearch.find(api => api.file.sha === sha);
   }
 }
