@@ -9,13 +9,23 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { TokenComponent } from './components/token/token.component';
 import { SwaggerComponent } from './components/swagger/swagger.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LayoutModule } from '@angular/cdk/layout';
+import {
+  MatToolbarModule,
+  MatButtonModule,
+  MatSidenavModule,
+  MatIconModule,
+  MatListModule,
+  MatMenuModule,
+  MatProgressSpinnerModule, MatCardModule
+} from '@angular/material';
 
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     TokenComponent,
-    SwaggerComponent
+    SwaggerComponent,
   ],
   imports: [
     BrowserModule,
@@ -23,6 +33,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    LayoutModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+    MatIconModule,
+    MatListModule,
+    MatMenuModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,9 +1,42 @@
-<div *ngIf="lookingForContracts">
-  Searching contracts in your repositories... It can take some time depends how many repos do you have :)
-</div>
-<div>
-  <span *ngFor="let api of apis | async">
-    [<a routerLink="{{api.file.sha}}">{{api.repo.name | uppercase}} {{api.file.path}}</a>]
-  </span>
-</div>
-<router-outlet></router-outlet>
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <mat-menu #appMenu="matMenu">
+        <button mat-menu-item>Settings</button>
+        <button mat-menu-item>Help</button>
+      </mat-menu>
+
+      <button mat-icon-button [matMenuTriggerFor]="appMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <span>Jexia API Documentation</span>
+    </mat-toolbar>
+
+
+
+    <mat-card *ngIf="lookingForContracts" class="load-card">
+      <mat-spinner mode="indeterminate" [diameter]="50" class="spinner"></mat-spinner>
+      <div>Searching contracts in your repositories... It can take some time depends how many repos do you have :)</div>
+    </mat-card>
+    <div class="buttons">
+      <span *ngFor="let api of apis | async">
+        <mat-menu #apiMenu="matMenu">
+          <button mat-menu-item *ngFor="let file of api.files">
+            <a routerLink="{{file.sha}}">{{file.path}}</a>
+          </button>
+        </mat-menu>
+        <button mat-button [matMenuTriggerFor]="apiMenu">{{api.name}}</button>
+
+        <!--[<a routerLink="{{api.file.sha}}">{{api.repo.name | uppercase}} {{api.file.path}}</a>]-->
+      </span>
+    </div>
+    <div class="apidoc">
+      <router-outlet></router-outlet>
+    </div>
+
+
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

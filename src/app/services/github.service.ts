@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { concatMap, filter, map, reduce, switchMap, tap } from 'rxjs/operators';
@@ -100,12 +100,15 @@ export class GithubService {
     );
   }
 
+  /* find files in repositories by provided regular expression
+   * list of repositories has to be set in environment
+   */
   public find(pattern: RegExp) {
     return this.getRepos().pipe(
       switchMap(repos => from(
         repos.filter(repo => environment.repos.includes(repo.name))
       )),
-      tap(repos => console.log(repos)),
+      /* filter out empty repos */
       filter(repo => !!repo.size),
       concatMap((repo: GHRepo) => this.getRepoContent(repo).pipe(
         concatMap((content: GHRepoContent[]) => this.findInContent(repo, content, pattern))
@@ -113,11 +116,17 @@ export class GithubService {
       reduce((result, files) => {
         return [...result, ...files];
       }, []),
-      tap(result => {
-        this.lastSearch = result;
-        console.log(this.lastSearch);
-      })
+      /* save results */
+      tap(result => this.lastSearch = result)
     );
+  }
+
+  public get getRequestInterceptor(): (T) => any {
+    return request => {
+      request.headers['Authorization'] = 'token ' + this.authService.token;
+      request.headers['Accept'] = 'application/vnd.github.v3+json';
+      return request;
+    };
   }
 
   public getApiBySha(sha: string): GHFile {

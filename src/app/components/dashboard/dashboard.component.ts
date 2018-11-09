@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { GithubService } from 'src/app/services/github.service';
 
 @Component({
@@ -12,6 +12,18 @@ export class DashboardComponent {
   public lookingForContracts = true;
 
   public apis = this.github.find(new RegExp('^.*\.yaml$')).pipe(
+    map(repos => repos.reduce((acc, current) => {
+      const repo = acc.find(r => r.name === current.repo.name);
+      if (repo) {
+        repo.files.push(current.file);
+      } else {
+        acc.push({
+          name: current.repo.name,
+          files: [current.file]
+        });
+      }
+      return acc;
+    }, [])),
     tap(() => this.lookingForContracts = false)
   );
 
