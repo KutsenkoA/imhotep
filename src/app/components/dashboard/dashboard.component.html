@@ -3,7 +3,7 @@
   <mat-sidenav-content>
     <mat-toolbar color="primary">
       <mat-menu #appMenu="matMenu">
-        <button mat-menu-item>Settings</button>
+        <button mat-menu-item (click)="goGithub()">GitHub Authorization Settings</button>
         <button mat-menu-item>Help</button>
       </mat-menu>
 
@@ -17,8 +17,18 @@
 
 
     <mat-card *ngIf="lookingForContracts" class="load-card">
-      <mat-spinner mode="indeterminate" [diameter]="50" class="spinner"></mat-spinner>
-      <div>Searching contracts in your repositories... It can take some time depends how many repos do you have :)</div>
+      <div *ngIf="error?.status === 401">
+        <div>GitHub access token has been revoked, you need to authorize again</div>
+        <button mat-stroked-button (click)="authorize()">Authorize</button>
+      </div>
+      <div *ngIf="error && error.status !== 401">
+        <div>Something went wrong</div>
+        <button mat-stroked-button (click)="tryAgain()">Try again</button>
+      </div>
+      <div *ngIf="!error">
+        <mat-spinner mode="indeterminate" [diameter]="50" class="spinner"></mat-spinner>
+        <div>Searching contracts in your repositories... It can take some time depends how many repos do you have :)</div>
+      </div>
     </mat-card>
     <div class="buttons">
       <span *ngFor="let api of apis | async">

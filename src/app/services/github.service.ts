@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { from, Observable, of } from 'rxjs';
 import { concatMap, filter, map, reduce, switchMap, tap } from 'rxjs/operators';
@@ -59,6 +59,7 @@ export class GithubService {
     );
   }
 
+  /* request to the Github API with the token included */
   public request<T = any>(url: string, method: string = 'GET', options = {}): Observable<T | HttpResponse<T>> {
     return this.http.request<T>(method, url.startsWith('https://') ? url : this.endpoint + url, {
       ...options,
@@ -69,18 +70,26 @@ export class GithubService {
     });
   }
 
+  /* load a list of repositories */
   public getRepos(): Observable<GHRepo[]> {
     return this.requestPagination<GHRepo>('/user/repos');
   }
 
+  /* load content of the repo */
   public getRepoContent(repo: GHRepo): Observable<GHRepoContent[]> {
     return this.requestPagination<GHRepoContent>(`/repos/${repo.owner.login}/${repo.name}/contents`);
   }
 
+  /* recursively find a file in the repo comparing file name to the pattern */
   public findInContent(repo: GHRepo, content: GHRepoContent[], pattern: RegExp): Observable<GHFile[]> {
 
     const files: GHFile[] = [];
 
+    /* each entry in the repo can be either a file or a folder
+     * if it's file and it match the pattern - keep it
+     * otherwise if it's a dir - put it in an array, create observable stream
+     * from these dirs and find in each dir
+     */
     const dirs = content.filter((file: GHRepoContent) => {
       if (file.type === 'file' && pattern.test(file.name)) {
         files.push({ repo, file });
@@ -90,6 +99,7 @@ export class GithubService {
       }
     });
 
+    /* stop searching if there are no more dirs */
     if (!dirs.length) {
       return of(files);
     }
@@ -121,6 +131,9 @@ export class GithubService {
     );
   }
 
+  /* when swagger-ui gets contract files, add token and accept header
+     to the each request
+   */
   public get getRequestInterceptor(): (T) => any {
     return request => {
       request.headers['Authorization'] = 'token ' + this.authService.token;
@@ -129,6 +142,7 @@ export class GithubService {
     };
   }
 
+  /* return found file by SHA */
   public getApiBySha(sha: string): GHFile {
     return this.lastSearch.find(api => api.file.sha === sha);
   }

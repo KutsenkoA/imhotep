@@ -2,19 +2,22 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+const CLIENT_ID = '7c474e27de89589114f9';
+
 export const environment = {
   production: false,
   auth: {
     github: {
       url: 'https://github.com/login/oauth/authorize',
       exchange_url: 'https://github.com/login/oauth/access_token',
-      client_id: '7c474e27de89589114f9',
+      client_id: CLIENT_ID,
       client_secret: 'ffb5981db5420d255cb7ef90847bf454efffff4f',
       scope: 'repo',
       redirect: {
         code_url: 'http://localhost.com:4210/token',
         token_url: ''
-      }
+      },
+      settings: `https://github.com/settings/connections/applications/${CLIENT_ID}`
     }
   },
   repos: [

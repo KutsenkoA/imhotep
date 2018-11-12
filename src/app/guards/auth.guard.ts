@@ -18,12 +18,7 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot): boolean {
 
     if (!this.authService.token) {
-      location.assign(
-        environment.auth.github.url +
-        `?client_id=${environment.auth.github.client_id}` +
-        `&redirect_uri=${environment.auth.github.redirect.code_url}` +
-        `&scope=${environment.auth.github.scope}`
-      );
+      this.authService.goGithub();
     }
     return true;
   }
