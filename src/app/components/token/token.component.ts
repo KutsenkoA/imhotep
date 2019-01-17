@@ -31,10 +31,7 @@ export class TokenComponent implements OnInit {
   ngOnInit() {
     this.activatedRoute.queryParams.pipe(
       switchMap((params: {code: string}) => this.http.post(
-        environment.auth.github.exchange_url +
-        `?client_id=${environment.auth.github.client_id}` +
-        `&client_secret=${environment.auth.github.client_secret}` +
-        `&code=${params.code}`, null,
+        environment.backend + '/token', { code: params.code },
         { headers: new HttpHeaders({
             'Accept': 'application/json'
           })}

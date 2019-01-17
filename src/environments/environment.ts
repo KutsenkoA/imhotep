@@ -6,12 +6,12 @@ const CLIENT_ID = '7c474e27de89589114f9';
 
 export const environment = {
   production: false,
+  backend: 'http://localhost:3000',
   auth: {
     github: {
       url: 'https://github.com/login/oauth/authorize',
       exchange_url: 'https://github.com/login/oauth/access_token',
       client_id: CLIENT_ID,
-      client_secret: 'ffb5981db5420d255cb7ef90847bf454efffff4f',
       scope: 'repo',
       redirect: {
         code_url: 'http://localhost.com:4210/token',

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 import { GithubService } from 'src/app/services/github.service';
+import { environment } from 'src/environments/environment';
 import SwaggerUI from 'swagger-ui';
 
 @Component({
@@ -13,7 +15,8 @@ export class SwaggerComponent implements OnInit {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private githubService: GithubService
+    private githubService: GithubService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -25,8 +28,8 @@ export class SwaggerComponent implements OnInit {
       const api = this.githubService.getApiBySha(params.sha);
       SwaggerUI({
         dom_id: '#swagger-ui',
-        url: api.file.download_url,
-        requestInterceptor: this.githubService.getRequestInterceptor
+        url: environment.backend + `/contract?url=${api.file.download_url}&token=${this.authService.token}`
+        // requestInterceptor: this.githubService.getRequestInterceptor
       });
     });
   }
