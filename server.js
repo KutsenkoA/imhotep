@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require("compression");
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 const app = express();
@@ -10,6 +11,7 @@ const CLIENT_SECRET = 'ffb5981db5420d255cb7ef90847bf454efffff4f';
 const GITHUB_URL = 'https://github.com/login/oauth/access_token';
 
 app.use(bodyParser.json());
+app.use(compression());
 
 app.all('*', (req, res, next) => {
   res.set({
@@ -43,6 +45,8 @@ app.get('/contract', (req, res) => {
     .then(response => res.send(response))
     .catch(() => res.sendStatus(500));
 });
+
+app.get('*', express.static('dist/imhotep'));
 
 app.listen(port, () => console.log(`server listening on port ${port}`));
 

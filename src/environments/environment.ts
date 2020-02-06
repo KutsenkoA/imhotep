@@ -6,7 +6,6 @@ const CLIENT_ID = '7c474e27de89589114f9';
 
 export const environment = {
   production: false,
-  backend: 'http://localhost:3000',
   auth: {
     github: {
       url: 'https://github.com/login/oauth/authorize',
@@ -14,7 +13,7 @@ export const environment = {
       client_id: CLIENT_ID,
       scope: 'repo',
       redirect: {
-        code_url: 'http://localhost.com:4210/token',
+        code_url: 'http://localhost.com/token',
         token_url: ''
       },
       settings: `https://github.com/settings/connections/applications/${CLIENT_ID}`

@@ -31,7 +31,8 @@ export class TokenComponent implements OnInit {
   ngOnInit() {
     this.activatedRoute.queryParams.pipe(
       switchMap((params: {code: string}) => this.http.post(
-        environment.backend + '/token', { code: params.code },
+        '/token',
+        { code: params.code },
         { headers: new HttpHeaders({
             'Accept': 'application/json'
           })}
