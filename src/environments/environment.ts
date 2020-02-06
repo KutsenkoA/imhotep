@@ -13,7 +13,7 @@ export const environment = {
       client_id: CLIENT_ID,
       scope: 'repo',
       redirect: {
-        code_url: 'http://localhost.com/token',
+        code_url: 'https://067201c0-88f6-42d2-b99b-07c71b84726f.jexia.app/token',
         token_url: ''
       },
       settings: `https://github.com/settings/connections/applications/${CLIENT_ID}`
