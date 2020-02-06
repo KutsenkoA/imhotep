@@ -28,7 +28,7 @@ export class SwaggerComponent implements OnInit {
       const api = this.githubService.getApiBySha(params.sha);
       SwaggerUI({
         dom_id: '#swagger-ui',
-        url: environment.backend + `/contract?url=${api.file.download_url}&token=${this.authService.token}`
+        url: `/contract?url=${api.file.download_url}&token=${this.authService.token}`
         // requestInterceptor: this.githubService.getRequestInterceptor
       });
     });
